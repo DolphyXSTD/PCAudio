@@ -1,5 +1,4 @@
 import speech_recognition as spr
-import vosk
 
 sr = spr.Recognizer()
 sr.pause_threshold = 0.5
