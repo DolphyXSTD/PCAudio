@@ -3,7 +3,7 @@ import os
 import importlib
 import json
 
-import levenshtein
+import modules
 
 # Gets all commands
 with open("command_list.json", "r", encoding='utf-8') as file:
@@ -26,7 +26,7 @@ def listen_command():
         sr.adjust_for_ambient_noise(source=mic, duration=0.5)
         audio = sr.listen(mic)
         voice = sr.recognize_vosk(audio_data=audio, language="ru-RU").lower()[14:-3]
-        command = levenshtein.recognize_cmd(voice, command_list)
+        command = modules.recognize_cmd(voice, command_list)
         if command['cmd'] in command_list:
             globals()[command['cmd']].command(voice)
 
