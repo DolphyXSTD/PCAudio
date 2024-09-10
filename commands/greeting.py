@@ -1,2 +1,2 @@
-def command():
+def command(cmd):
     print('Дарова емае')
