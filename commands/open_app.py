@@ -1,5 +1,5 @@
 import os
-
+import subprocess
 def command(app):
-    # Command to open Notepad
-    os.startfile(app)
+
+    process = subprocess.Popen(app)
