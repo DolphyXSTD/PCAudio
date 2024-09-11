@@ -8,7 +8,8 @@ import modules
 # Gets all commands
 with open("command_list.json", "r", encoding='utf-8') as file:
     command_list = json.load(file)
-
+with open("numbers.json", "r", encoding='utf-8') as file:
+    number_list = json.load(file)
 # Get a list of all files in the folder
 module_files = [f for f in os.listdir('commands') if f.endswith('.py')]
 # Import each module
@@ -23,12 +24,23 @@ sr.pause_threshold = 0.5
 #listens commands
 def listen_command():
     with spr.Microphone() as mic:
-        sr.adjust_for_ambient_noise(source=mic, duration=0.5)
+        sr.adjust_for_ambient_noise(source=mic, duration=1)
         audio = sr.listen(mic)
-        voice = sr.recognize_vosk(audio_data=audio, language="ru-RU").lower()[14:-3]
-        command = modules.recognize_cmd(voice, command_list)
+        raw_voice = sr.recognize_vosk(audio_data=audio, language="ru-RU").lower()[14:-3]
+        print(raw_voice)
+        voice = raw_voice
+        voice = voice.split()
+        for t, n in number_list.items():
+            if t in voice:
+                voice.remove(t)
+        voice = "".join(voice)
+        command = modules.levenshtein(voice, command_list)
+        print(command)
         if command['cmd'] in command_list:
-            globals()[command['cmd']].command(voice)
+            if command['arg'] != '':
+                globals()[command['cmd']].command(command['arg'])
+            else:
+                globals()[command['cmd']].command(raw_voice)
 
 #cycle
 while True:
