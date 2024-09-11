@@ -38,6 +38,8 @@ def fetch_numbers(cmd: str):
 
 def get_number(cmd):
     nums = fetch_numbers(cmd)
+    if not nums:
+        return "None"
     return sum_numbers(nums)
 
 # using Levenshtein algorithm
