@@ -5,6 +5,7 @@ import json
 
 import modules
 
+isWorking = True
 # Gets all commands
 with open("command_list.json", "r", encoding='utf-8') as file:
     command_list = json.load(file)
@@ -36,12 +37,15 @@ def listen_command():
         voice = "".join(voice)
         command = modules.levenshtein(voice, command_list)
         print(command)
-        if command['cmd'] in command_list:
-            if command['arg'] != '':
-                globals()[command['cmd']].command(command['arg'])
-            else:
-                globals()[command['cmd']].command(raw_voice)
-
+        if isWorking:
+            if command['cmd'] in command_list:
+                if command['arg'] != '':
+                    globals()[command['cmd']].command(command['arg'])
+                else:
+                    globals()[command['cmd']].command(raw_voice)
+        else:
+            if command['cmd'] == "start":
+                pass
 #cycle
 while True:
     listen_command()
