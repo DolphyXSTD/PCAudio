@@ -8,7 +8,7 @@ import queue
 
 import modules
 
-model = vosk.Model("model_big")
+model = vosk.Model("model")
 samplerate = 16000
 device = 1
 q = queue.Queue()
