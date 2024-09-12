@@ -2,10 +2,11 @@ import speech_recognition as spr
 import os
 import importlib
 import json
+import time
 
 import modules
 
-isWorking = True
+isWorking = False
 # Gets all commands
 with open("command_list.json", "r", encoding='utf-8') as file:
     command_list = json.load(file)
@@ -22,8 +23,14 @@ for module_file in module_files:
 sr = spr.Recognizer()
 sr.pause_threshold = 0.5
 
+start_work = 0
+work_time = 50
 #listens commands
 def listen_command():
+    global start_work, work_time, isWorking
+    if start_work > 0:
+        if time.time() > start_work + work_time:
+            isWorking = False
     with spr.Microphone() as mic:
         sr.adjust_for_ambient_noise(source=mic, duration=1)
         audio = sr.listen(mic)
@@ -43,9 +50,10 @@ def listen_command():
                     globals()[command['cmd']].command(command['arg'])
                 else:
                     globals()[command['cmd']].command(raw_voice)
-        else:
-            if command['cmd'] == "start":
-                pass
+        if command['cmd'] == "start":
+            start_work = time.time()
+            isWorking = True
+
 #cycle
 while True:
     listen_command()
