@@ -15,7 +15,6 @@ q = queue.Queue()
 isWorking = False
 start_work = 0
 work_time = 15
-
 # Gets all commands and jsons
 with open("command_list.json", "r", encoding='utf-8') as file:
     command_list = json.load(file)
