@@ -13,8 +13,6 @@ import interface
 interface_thread = threading.Thread(target=interface.main, args=())
 interface_thread.start()
 
-
-
 model = vosk.Model("stt_model")
 sample_rate = 16000
 device = 1
@@ -60,7 +58,6 @@ def listen_command(raw_voice, fullCommand):
     if start_work > 0:
         if time.time() > start_work + work_time:
             isWorking = False
-            print('turn_off')
 
     voice = raw_voice
     voice = voice.split()
@@ -79,7 +76,6 @@ def listen_command(raw_voice, fullCommand):
     if not fullCommand and command['cmd'] == "start":
         start_work = time.time()
         isWorking = True
-        print('turn_on')
 listening_thread = threading.Thread(target=listen, args=(rec, listen_command))
 listening_thread.start()
 
