@@ -3,20 +3,24 @@ import json
 import os
 import queue
 import time
+import threading
 
 import sounddevice as sd
 import vosk
 
-import interface
 import modules
-import tts_module
+import interface
+interface_thread = threading.Thread(target=interface.main, args=())
+interface_thread.start()
+
+
 
 model = vosk.Model("stt_model")
 sample_rate = 16000
 device = 1
 q = queue.Queue()
 rec = vosk.KaldiRecognizer(model, sample_rate)
-tts_module.loading_models += 1
+modules.load_models += 1
 
 isWorking = False
 start_work = 0
@@ -76,10 +80,6 @@ def listen_command(raw_voice, fullCommand):
         start_work = time.time()
         isWorking = True
         print('turn_on')
-
-if tts_module.loading_models == 2:
-    print(134)
-    interface.main()
-
-listen(rec, listen_command)
+listening_thread = threading.Thread(target=listen, args=(rec, listen_command))
+listening_thread.start()
 

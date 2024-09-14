@@ -1,6 +1,8 @@
 from fuzzywuzzy import fuzz
 import json
 
+load_models = 0
+
 with open("numbers.json", "r", encoding='utf-8') as file:
     numbers = json.load(file)
 def create_text_of_nums(dictionary, values):
