@@ -9,9 +9,7 @@ def command(app):
     for proc in psutil.process_iter(['pid', 'name']):
         if proc.info['name'] == app:
             try:
-                print(proc.info)
-                proc.terminate()
-                print(f"Terminated process: {proc.info['name']} (PID: {proc.info['pid']})")
                 tts_module.speak(f'команда выполнена: {name}')
+                proc.terminate()
             except:
                 pass

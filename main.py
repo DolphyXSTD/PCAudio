@@ -1,24 +1,30 @@
-import os
 import importlib
 import json
-import time
-import vosk
-import sounddevice as sd
+import os
 import queue
+import time
+
+import sounddevice as sd
+import vosk
+
+import interface
 import modules
+import tts_module
 
 model = vosk.Model("stt_model")
 sample_rate = 16000
 device = 1
 q = queue.Queue()
+rec = vosk.KaldiRecognizer(model, sample_rate)
+tts_module.loading_models += 1
 
 isWorking = False
 start_work = 0
 work_time = 15
+
 # Gets all commands and jsons
 with open("command_list.json", "r", encoding='utf-8') as file:
     command_list = json.load(file)
-    interface_cmd_list = command_list
 with open("numbers.json", "r", encoding='utf-8') as file:
     number_list = json.load(file)
 
@@ -33,10 +39,10 @@ def q_callback(indata, frames, time, status):
     q.put(bytes(indata))
 
 #records voice
-def listen(callback):
+def listen(rec, callback):
+    global loading_models
     with sd.RawInputStream(samplerate=sample_rate, blocksize=8000, device=device, dtype='int16',
                            channels=1, callback=q_callback):
-        rec = vosk.KaldiRecognizer(model, sample_rate)
         while True:
             data = q.get()
             if rec.AcceptWaveform(data):
@@ -71,4 +77,9 @@ def listen_command(raw_voice, fullCommand):
         isWorking = True
         print('turn_on')
 
-listen(listen_command)
+if tts_module.loading_models == 2:
+    print(134)
+    interface.main()
+
+listen(rec, listen_command)
+
