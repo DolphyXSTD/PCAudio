@@ -2,6 +2,7 @@ import importlib
 import json
 import os
 import queue
+import sys
 import time
 import threading
 
@@ -10,6 +11,7 @@ import vosk
 
 import modules
 import interface
+
 interface_thread = threading.Thread(target=interface.main, args=())
 interface_thread.start()
 
@@ -51,6 +53,8 @@ def listen(rec, callback):
                 callback(json.loads(rec.Result())["text"], True)
             else:
                 callback(json.loads(rec.PartialResult())["partial"], False)
+            if interface.closed:
+                sys.exit()
 
 #listens commands
 def listen_command(raw_voice, fullCommand):
@@ -58,7 +62,6 @@ def listen_command(raw_voice, fullCommand):
     if start_work > 0:
         if time.time() > start_work + work_time:
             isWorking = False
-
     voice = raw_voice
     voice = voice.split()
     for t, n in number_list.items():
@@ -76,6 +79,6 @@ def listen_command(raw_voice, fullCommand):
     if not fullCommand and command['cmd'] == "start":
         start_work = time.time()
         isWorking = True
+
 listening_thread = threading.Thread(target=listen, args=(rec, listen_command))
 listening_thread.start()
-

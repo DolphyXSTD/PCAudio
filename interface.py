@@ -1,10 +1,17 @@
 from tkinter import *
-from tkinter import ttk
 import time
+from tkinter.ttk import Progressbar
+
 import modules
 
-def simulate_loading(progress_bar, label, duration = 5):
+closed = False
+def simulate_loading(duration = 5):
     state = 0
+    progress_bar = Progressbar(window, orient="horizontal", length=300, mode="determinate")
+    progress_bar.pack(pady=10)
+    label = Label(window, text="")
+    progress_bar.pack(pady=10)
+    label.pack()
     for i in range(101):
         time.sleep(duration / 100)  # Simulate loading time
         if modules.load_models == 0 and state == 0:
@@ -22,14 +29,19 @@ def simulate_loading(progress_bar, label, duration = 5):
     progress_bar.destroy()
     label.destroy()
 
+def close_app():
+    global window, closed
+    print('closing')
+    closed = True
+    window.destroy()
+
 def main():
     global window
     window = Tk()
-    progress_bar = ttk.Progressbar(window, orient="horizontal", length=300, mode="determinate")
-    progress_bar.pack(pady=10)
-    label = Label(window, text="")
-    progress_bar.pack(pady=10)
-    label.pack()
-    simulate_loading(progress_bar, label)
+
+    simulate_loading()
+
     window.geometry('800x600')
+    window.protocol("WM_DELETE_WINDOW", close_app)
+
     window.mainloop()

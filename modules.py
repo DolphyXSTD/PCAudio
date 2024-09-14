@@ -1,6 +1,31 @@
 from fuzzywuzzy import fuzz
 import json
+import winreg
+import os
 
+def add_to_startup(program_name, relative_program_path):
+    try:
+        program_path = os.path.abspath(relative_program_path)
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0,
+                             winreg.KEY_ALL_ACCESS)
+        winreg.SetValueEx(key, program_name, 0, winreg.REG_SZ, program_path)
+        winreg.CloseKey(key)
+        print('added')
+    except:
+        pass
+
+def remove_from_startup(program_name):
+    try:
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", 0,
+                             winreg.KEY_ALL_ACCESS)
+        winreg.DeleteValue(key, program_name)
+        winreg.CloseKey(key)
+        print('removed')
+    except:
+        pass
+
+program_name = "PCAudio"
+relative_program_path = "main.py"
 load_models = 0
 
 with open("numbers.json", "r", encoding='utf-8') as file:
