@@ -5,14 +5,12 @@ import time
 import vosk
 import sounddevice as sd
 import queue
-
 import modules
 
 model = vosk.Model("model")
-samplerate = 16000
+sample_rate = 16000
 device = 1
 q = queue.Queue()
-
 
 isWorking = False
 start_work = 0
@@ -39,9 +37,9 @@ def q_callback(indata, frames, time, status):
 
 #records voice
 def listen(callback):
-    with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dtype='int16',
+    with sd.RawInputStream(samplerate=sample_rate, blocksize=8000, device=device, dtype='int16',
                            channels=1, callback=q_callback):
-        rec = vosk.KaldiRecognizer(model, samplerate)
+        rec = vosk.KaldiRecognizer(model, sample_rate)
         while True:
             data = q.get()
             if rec.AcceptWaveform(data):
