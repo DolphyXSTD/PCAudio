@@ -3,21 +3,33 @@ import json
 
 with open("numbers.json", "r", encoding='utf-8') as file:
     numbers = json.load(file)
+def create_text_of_nums(dictionary, values):
+    text = ''
+    for value in values:
+        for key, val in dictionary.items():
+            if val == value:
+                text += key
+    return text
+
 
 def sum_numbers(nums):
     wait_for = False
     summa = 0
-    for i in range (len(nums)):
-        if nums[i] in [20, 30, 40, 50, 60, 70, 80, 90]:
-            summa = nums[i]
+    used_nums = []
+    for num in nums:
+        if num in [20, 30, 40, 50, 60, 70, 80, 90]:
+            summa = num
+            used_nums.append(num)
             wait_for = True
         elif not wait_for:
-            return nums[i]
+            used_nums.append(num)
+            return used_nums, num
         else:
-            if nums[i] in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
-                summa += nums[i]
-            return summa
-    return summa
+            if num in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
+                summa += num
+                used_nums.append(num)
+            return used_nums, summa
+    return used_nums, summa
 
 def fetch_numbers(cmd: str):
     cmd = cmd.split(' ')

@@ -1,2 +1,3 @@
+import tts_module
 def command(voice):
-    print('Дарова емае')
+    tts_module.speak('Дарова')

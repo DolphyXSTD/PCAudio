@@ -7,7 +7,7 @@ import sounddevice as sd
 import queue
 import modules
 
-model = vosk.Model("model")
+model = vosk.Model("stt_model")
 sample_rate = 16000
 device = 1
 q = queue.Queue()
@@ -20,8 +20,6 @@ work_time = 15
 with open("command_list.json", "r", encoding='utf-8') as file:
     command_list = json.load(file)
     interface_cmd_list = command_list
-    del command_list['start']
-    print(command_list)
 with open("numbers.json", "r", encoding='utf-8') as file:
     number_list = json.load(file)
 
@@ -62,9 +60,9 @@ def listen_command(raw_voice, fullCommand):
             voice.remove(t)
     voice = "".join(voice)
     command = modules.levenshtein(voice, command_list)
-    print(command)
+    print(raw_voice,command,fullCommand)
     if isWorking and fullCommand:
-        if command['cmd'] in command_list:
+        if command['cmd'] in command_list and command['cmd'] != 'start':
             if command['arg'] != '':
                 globals()[command['cmd']].command(command['arg'])
             else:
