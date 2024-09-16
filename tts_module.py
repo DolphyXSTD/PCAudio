@@ -1,11 +1,11 @@
 import torch
 import sounddevice as sd
 import numpy as np
-
+from pathfinder import find_path
 import modules
 
 
-torch.hub.set_dir('tts_models')
+torch.hub.set_dir(find_path('tts_models'))
 sample_rate = 48000
 model, example_text = torch.hub.load(repo_or_dir='snakers4/silero-models',
                                      model='silero_tts',

@@ -1,8 +1,9 @@
 import psutil
 import json
 import tts_module
+from pathfinder import find_path
 
-with open("command_list.json", "r", encoding='utf-8') as file:
+with open(find_path('command_list.json'), "r", encoding='utf-8') as file:
     command_list = json.load(file)
 def command(app):
     name = command_list['close_app'][app][1]

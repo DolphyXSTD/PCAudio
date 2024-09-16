@@ -11,11 +11,13 @@ import vosk
 
 import modules
 import interface
-
+from pathfinder import find_path
 interface_thread = threading.Thread(target=interface.main, args=())
 interface_thread.start()
 
-model = vosk.Model("stt_model")
+import tts_module
+
+model = vosk.Model(find_path("stt_model"))
 sample_rate = 16000
 device = 1
 q = queue.Queue()
@@ -27,12 +29,12 @@ start_work = 0
 work_time = 15
 
 # Gets all commands and jsons
-with open("command_list.json", "r", encoding='utf-8') as file:
+with open(find_path("command_list.json"), "r", encoding='utf-8') as file:
     command_list = json.load(file)
-with open("numbers.json", "r", encoding='utf-8') as file:
+with open(find_path("command_list.json"), "r", encoding='utf-8') as file:
     number_list = json.load(file)
 
-module_files = [f for f in os.listdir('commands') if f.endswith('.py')]
+module_files = [f for f in os.listdir(find_path('commands')) if f.endswith('.py')]
 for module_file in module_files:
     module = importlib.import_module(f"commands.{module_file[:-3]}")
     globals()[module_file[:-3]] = module  # Make the module available in the global namespace

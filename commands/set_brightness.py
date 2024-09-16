@@ -2,8 +2,8 @@ import wmi
 import modules
 import tts_module
 import json
-
-with open("numbers.json", "r", encoding='utf-8') as file:
+from pathfinder import find_path
+with open(find_path('numbers.json'), "r", encoding='utf-8') as file:
     number_list = json.load(file)
 
 def command(voice):

@@ -1,13 +1,21 @@
 from tkinter import *
 import time
-from tkinter.ttk import Progressbar
-
+from tkinter import ttk
+import json
 import modules
+from pathfinder import find_path
 
+#STATES = ['home','add_command','command_voices','voice_responces', 'add_app', 'add_web']
+#current_state = 'home'
 closed = False
+
+with open(find_path("user_prefs.json"), 'r', encoding='utf-8') as file:
+    user_prefs = json.load(file)
+
 def simulate_loading(duration = 5):
     state = 0
-    progress_bar = Progressbar(window, orient="horizontal", length=300, mode="determinate")
+    end_i = 0
+    progress_bar = ttk.Progressbar(window, orient="horizontal", length=300, mode="determinate")
     progress_bar.pack(pady=10)
     label = Label(window, text="")
     progress_bar.pack(pady=10)
@@ -23,25 +31,55 @@ def simulate_loading(duration = 5):
         elif modules.load_models == 2 and state == 2:
             label.config(text="Finishing...")
             state = 3
-            i = 95
-        progress_bar['value'] = i
+            end_i = i
+        if end_i > 0:
+            progress_bar['value'] = 95 + i - end_i
+        else:
+            progress_bar['value'] = i
+        if progress_bar['value'] == 100:
+            break
         window.update()
     progress_bar.destroy()
     label.destroy()
 
 def close_app():
     global window, closed
-    print('closing')
     closed = True
     window.destroy()
+
+def change_settings(label, value):
+    user_prefs[label] = value
+    json_string = json.dumps(user_prefs, indent=4)
+    with open('_internal/user_prefs.json', 'w') as file:
+        file.write(json_string)
+
+def settings():
+    settings_window = Tk()
+    settings_window.title('Settings')
+    settings_window.geometry("200x300+200+200")
+    checkbox = Checkbutton(settings_window,text="Start with OS", variable=user_prefs['isStartup'])
+    checkbox.pack()
 
 def main():
     global window
     window = Tk()
+    window.title('PCAudio')
+
+    if user_prefs['isStartup'] == -1:
+        modules.add_to_startup("PCAudio", 'start_test.bat')
+        change_settings('isStartup', 1)
 
     simulate_loading()
 
     window.geometry('800x600')
     window.protocol("WM_DELETE_WINDOW", close_app)
+
+    menu_bar = Menu(window)
+    window.config(menu=menu_bar)
+
+    settings_exit = Menu(menu_bar, tearoff=0)
+    menu_bar.add_cascade(label='Menu', menu=settings_exit)
+    settings_exit.add_command(label="Settings", command=settings)
+    settings_exit.add_command(label="Exit", command=close_app)
 
     window.mainloop()

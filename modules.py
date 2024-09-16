@@ -3,6 +3,8 @@ import json
 import winreg
 import os
 
+from pathfinder import find_path
+
 def add_to_startup(program_name, relative_program_path):
     try:
         program_path = os.path.abspath(relative_program_path)
@@ -12,7 +14,7 @@ def add_to_startup(program_name, relative_program_path):
         winreg.CloseKey(key)
         print('added')
     except:
-        pass
+        print('no')
 
 def remove_from_startup(program_name):
     try:
@@ -21,14 +23,11 @@ def remove_from_startup(program_name):
         winreg.DeleteValue(key, program_name)
         winreg.CloseKey(key)
         print('removed')
-    except:
-        pass
+    except Exception as e:
+        print('no such file', e)
 
-program_name = "PCAudio"
-relative_program_path = "main.py"
 load_models = 0
-
-with open("numbers.json", "r", encoding='utf-8') as file:
+with open(find_path('numbers.json'), "r", encoding='utf-8') as file:
     numbers = json.load(file)
 def create_text_of_nums(dictionary, values):
     text = ''
@@ -106,4 +105,3 @@ def levenshtein(cmd: str, check_list):
     if not likely_commands:
         return rc
     return likely_commands[0]
-
