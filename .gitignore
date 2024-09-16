@@ -1,5 +1,4 @@
 commands/__pycache__
-tts_models
 vosk/
 comtypes/
 omegaconf/

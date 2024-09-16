@@ -6,12 +6,16 @@ import sys
 import time
 import threading
 
+from create_data import *
+on_load()
+
 import sounddevice as sd
 import vosk
 
 import modules
 import interface
 from pathfinder import find_path
+
 interface_thread = threading.Thread(target=interface.main, args=())
 interface_thread.start()
 
@@ -29,11 +33,10 @@ start_work = 0
 work_time = 15
 
 # Gets all commands and jsons
-with open(find_path("command_list.json"), "r", encoding='utf-8') as file:
+with open(command_list_dir, "r", encoding='utf-8') as file:
     command_list = json.load(file)
-with open(find_path("command_list.json"), "r", encoding='utf-8') as file:
+with open(find_path("numbers.json"), "r", encoding='utf-8') as file:
     number_list = json.load(file)
-
 module_files = [f for f in os.listdir(find_path('commands')) if f.endswith('.py')]
 for module_file in module_files:
     module = importlib.import_module(f"commands.{module_file[:-3]}")

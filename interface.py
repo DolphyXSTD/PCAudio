@@ -4,12 +4,12 @@ from tkinter import ttk
 import json
 import modules
 from pathfinder import find_path
-
+from create_data import user_prefs_dir
 #STATES = ['home','add_command','command_voices','voice_responces', 'add_app', 'add_web']
 #current_state = 'home'
 closed = False
 
-with open(find_path("user_prefs.json"), 'r', encoding='utf-8') as file:
+with open(user_prefs_dir, 'r', encoding='utf-8') as file:
     user_prefs = json.load(file)
 
 def simulate_loading(duration = 5):
@@ -50,7 +50,7 @@ def close_app():
 def change_settings(label, value):
     user_prefs[label] = value
     json_string = json.dumps(user_prefs, indent=4)
-    with open('_internal/user_prefs.json', 'w') as file:
+    with open(user_prefs_dir, 'w') as file:
         file.write(json_string)
 
 def settings():
