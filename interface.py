@@ -17,26 +17,6 @@ ALL_SPEAKERS = ['aidar', 'baya', 'kseniya', 'xenia']
 current_state = ''
 closed = False
 
-
-class CyclicSpinbox(ttk.Spinbox):
-    def __init__(self, master=None, values=None, textvariable=None, **kwargs):
-        super().__init__(master, values=values, textvariable=textvariable, **kwargs)
-        self.values = values
-        self.current_index = ALL_SPEAKERS.index(textvariable.get())
-        self.configure(command=self.on_change)
-
-    def on_change(self):
-        self.current_index = (self.current_index + 1) % len(self.values)
-        self.set(self.values[self.current_index])
-
-    def invoke(self, direction):
-        if direction == "increment":
-            self.current_index = (self.current_index + 1) % len(self.values)
-        elif direction == "decrement":
-            self.current_index = (self.current_index - 1) % len(self.values)
-        self.set(self.values[self.current_index])
-
-
 def simulate_loading(duration = 5):
     state = 0
     end_i = 0
@@ -106,7 +86,7 @@ def create_states():
     label.pack()
     global chosenSpeaker
     chosenSpeaker = StringVar(value=user_prefs['speaker'])
-    speakerSpinBox = CyclicSpinbox(frame, values=ALL_SPEAKERS, textvariable=chosenSpeaker, command= lambda: change_settings('speaker', chosenSpeaker.get()))
+    speakerSpinBox = ttk.Spinbox(frame, values=ALL_SPEAKERS, textvariable=chosenSpeaker, command= lambda: change_settings('speaker', chosenSpeaker.get()), wrap=True)
     speakerSpinBox.pack()
     frames['settings'] = frame
 
