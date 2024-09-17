@@ -6,7 +6,7 @@ import sys
 import time
 import threading
 
-from create_data import *
+from start_config import *
 on_load()
 
 import sounddevice as sd

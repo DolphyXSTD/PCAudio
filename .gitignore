@@ -5,3 +5,4 @@ omegaconf/
 pycaw/
 wmi.py
 dist/
+build_text.txt

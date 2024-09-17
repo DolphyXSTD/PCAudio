@@ -5,9 +5,8 @@ import os
 
 from pathfinder import find_path
 
-def add_to_startup(program_name, relative_program_path):
+def add_to_startup(program_name, program_path):
     try:
-        program_path = os.path.abspath(relative_program_path)
         key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0,
                              winreg.KEY_ALL_ACCESS)
         winreg.SetValueEx(key, program_name, 0, winreg.REG_SZ, program_path)
@@ -18,13 +17,16 @@ def add_to_startup(program_name, relative_program_path):
 
 def remove_from_startup(program_name):
     try:
-        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", 0,
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", 0,
                              winreg.KEY_ALL_ACCESS)
         winreg.DeleteValue(key, program_name)
         winreg.CloseKey(key)
         print('removed')
+        with open("E:/path.txt", "a", encoding='utf8') as f:
+            f.write('removing')
     except Exception as e:
-        print('no such file', e)
+        with open("E:/path.txt", "a", encoding='utf8') as f:
+            f.write(f'no permission {e}')
 
 load_models = 0
 with open(find_path('numbers.json'), "r", encoding='utf-8') as file:
