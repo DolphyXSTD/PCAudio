@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from pathfinder import find_path
+from modules import find_path
 import shutil
 import modules
 
@@ -26,4 +26,4 @@ def on_load():
         shutil.copyfile(start_user_prefs_path, user_prefs_path)
     if getattr(sys, 'frozen', False):
         exe_path = sys.executable
-    modules.add_to_startup('pcAudio', exe_path)
+        modules.add_to_startup('pcAudio', exe_path)

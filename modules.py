@@ -1,9 +1,11 @@
 from fuzzywuzzy import fuzz
 import json
 import winreg
-import os
+from pkg_resources import resource_filename
 
-from pathfinder import find_path
+def find_path(file_name):
+    file_path = resource_filename(__name__, file_name)
+    return file_path
 
 def add_to_startup(program_name, program_path):
     try:
@@ -11,9 +13,8 @@ def add_to_startup(program_name, program_path):
                              winreg.KEY_ALL_ACCESS)
         winreg.SetValueEx(key, program_name, 0, winreg.REG_SZ, program_path)
         winreg.CloseKey(key)
-        print('added')
-    except:
-        print('no')
+    finally:
+        pass
 
 def remove_from_startup(program_name):
     try:
@@ -21,12 +22,8 @@ def remove_from_startup(program_name):
                              winreg.KEY_ALL_ACCESS)
         winreg.DeleteValue(key, program_name)
         winreg.CloseKey(key)
-        print('removed')
-        with open("E:/path.txt", "a", encoding='utf8') as f:
-            f.write('removing')
-    except Exception as e:
-        with open("E:/path.txt", "a", encoding='utf8') as f:
-            f.write(f'no permission {e}')
+    finally:
+        pass
 
 load_models = 0
 with open(find_path('numbers.json'), "r", encoding='utf-8') as file:
@@ -81,6 +78,7 @@ def get_number(cmd):
     if not nums:
         return "None"
     return sum_numbers(nums)
+
 
 # using Levenshtein algorithm
 def levenshtein(cmd: str, check_list):

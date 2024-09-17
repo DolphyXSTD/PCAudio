@@ -2,7 +2,6 @@ import importlib
 import json
 import os
 import queue
-import sys
 import time
 import threading
 
@@ -14,7 +13,6 @@ import vosk
 
 import modules
 import interface
-from pathfinder import find_path
 
 interface_thread = threading.Thread(target=interface.main, args=())
 interface_thread.start()
@@ -35,7 +33,7 @@ work_time = 15
 # Gets all commands and jsons
 with open(command_list_dir, "r", encoding='utf-8') as file:
     command_list = json.load(file)
-with open(find_path("numbers.json"), "r", encoding='utf-8') as file:
+with open(modules.find_path("numbers.json"), "r", encoding='utf-8') as file:
     number_list = json.load(file)
 module_files = [f for f in os.listdir(find_path('commands')) if f.endswith('.py')]
 for module_file in module_files:
