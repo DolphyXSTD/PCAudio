@@ -74,11 +74,15 @@ def listen_command(raw_voice, fullCommand):
     command = modules.levenshtein(voice, command_list)
     print(raw_voice,command,fullCommand)
     if isWorking and fullCommand:
-        if command['cmd'] in command_list and command['cmd'] != 'start':
-            if command['arg'] != '':
-                globals()[command['cmd']].command(command['arg'])
-            else:
-                globals()[command['cmd']].command(raw_voice)
+        try:
+            if command['cmd'] in command_list and command['cmd'] != 'start':
+                if command['arg'] != '':
+                    globals()[command['cmd']].command(command['arg'])
+                else:
+                    globals()[command['cmd']].command(raw_voice)
+        except Exception as e:
+            with open(f"{home_dir}/AppData/Roaming/{app_name}/error_log.txt", "a") as f:
+                f.write(f"{e}\n")
     if not fullCommand and command['cmd'] == "start":
         start_work = time.time()
         isWorking = True

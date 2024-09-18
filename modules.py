@@ -85,9 +85,9 @@ def levenshtein(cmd: str, check_list):
     likely_commands = []
     rc = {'cmd': '','arg': '', 'percent': 50}
     for c, v in check_list.items():
-        if isinstance(v, dict):
+        if not 'user' in v:
             for c1, v1 in v.items():
-                for x in v1:
+                for x in v1['user']:
                     vrt = fuzz.ratio(cmd, x)
                     if vrt > rc['percent']:
                         rc['cmd'] = c
@@ -95,7 +95,7 @@ def levenshtein(cmd: str, check_list):
                         rc['arg'] = c1
                         likely_commands.append(rc)
         else:
-            for x in v:
+            for x in v['user']:
                 vrt = fuzz.ratio(cmd, x)
                 if vrt > rc['percent']:
                     rc['cmd'] = c
