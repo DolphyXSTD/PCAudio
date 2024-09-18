@@ -14,7 +14,7 @@ with open(command_list_dir, 'r', encoding='utf-8') as file:
 if getattr(sys, 'frozen', False):
     exe_path = sys.executable
 
-STATIC_STATES = ['home', 'settings']
+STATIC_STATES = ['home', 'settings', 'add_app', 'add_website']
 DYNAMIC_STATES = ['show_commands', "change_voice_commands", "change_assistant_respond"]
 ALL_SPEAKERS = ['aidar', 'baya', 'kseniya', 'xenia']
 current_state = ''
@@ -113,6 +113,51 @@ def change_assistant_respond():
     with open(command_list_dir, "w", encoding='utf-8') as f:
         f.write(json_string)
 
+def app_website(form_data, name, url, command, respond):
+    global command_list
+    print(form_data[0].get(), form_data[1].get())
+    name.pack_forget()
+    url.pack_forget()
+    command.pack_forget()
+    respond.pack_forget()
+
+    exception = False
+    if not form_data[0].get():
+        name.pack(side=LEFT)
+        exception = True
+    if not form_data[1].get():
+        url.pack(side=LEFT)
+        exception = True
+    got_command = False
+    for i in range(5):
+        if form_data[2][i].get() != "":
+            got_command = True
+            break
+    if not got_command:
+        command.pack(side=LEFT)
+        exception = True
+    if not form_data[3].get():
+        respond.pack(side=LEFT)
+        exception = True
+    if exception:
+        return
+
+    if not form_data[1].get() in command_list['open_website']:
+        temp_dist = {'name': form_data[0].get()}
+        for i in range(5):
+            try:
+                form_data[2][i] = form_data[2][i].get()
+            except:
+                pass
+        temp_dist['user'] = form_data[2]
+        temp_dist['assistant'] = form_data[3].get()
+        command_list['open_website'][form_data[1].get()] = temp_dist
+        print(temp_dist)
+        json_string = json.dumps(command_list, indent=4)
+        with open(command_list_dir, "w", encoding='utf-8') as file:
+            file.write(json_string)
+
+
 def do_startup_change():
     state = startupVar.get()
     change_settings('isStartup', state)
@@ -144,6 +189,46 @@ def create_states():
     SoftName.pack()
     frames['home'] = frame
 
+    #add_website
+    frame = ttk.Frame(window)
+    Label = ttk.Label(frame, text="Добавить вебсайт", font=("Arial", 25))
+    Label.pack()
+    NameFrame = ttk.Frame(frame)
+    NameFrame.pack(side=TOP, anchor=W, pady=5)
+    SetNameLabel = ttk.Label(NameFrame, text="Добавить имя команды", font=("Arial", 15))
+    SetNameLabel.pack(side=LEFT, anchor=W, pady=5, padx=10)
+    NameWarning = ttk.Label(NameFrame, text='заполните это поле', foreground='#ff0000')
+    SetNameEntry = ttk.Entry(frame, width=50, validate='focusout')
+    SetNameEntry.pack(side=TOP, anchor=W, pady=5)
+    UrlFrame = ttk.Frame(frame)
+    UrlFrame.pack(side=TOP, anchor=W, pady=5)
+    SetUrlLabel = ttk.Label(UrlFrame, text="Добавить ссылку на сайт", font=("Arial", 15))
+    SetUrlLabel.pack(side=LEFT, padx=10)
+    UrlWarning = ttk.Label(UrlFrame, text='заполните это поле', foreground='#ff0000')
+    SetUrlEntry = ttk.Entry(frame, width=50, validate='focusout')
+    SetUrlEntry.pack(side=TOP, anchor=W, pady=5)
+    CommandFrame = ttk.Frame(frame)
+    CommandFrame.pack(side=TOP, anchor=W, pady=5)
+    SetCommandLabel = ttk.Label(CommandFrame, text="Добавить команды", font=("Arial", 15))
+    SetCommandLabel.pack(side=LEFT, padx=10)
+    CommandWarning = ttk.Label(CommandFrame, text='заполните это поле', foreground='#ff0000')
+
+    entries = []
+    for i in range(5):
+        SetCommandEntry = ttk.Entry(frame, width=50, validate='focusout')
+        SetCommandEntry.pack(side=TOP, anchor=W, pady=5)
+        entries.append(SetCommandEntry)
+    RespondFrame = ttk.Frame(frame)
+    RespondFrame.pack(side=TOP, anchor=W, pady=5)
+    SetRespondLabel = ttk.Label(RespondFrame, text="Добавить ответ ассистента", font=("Arial", 15))
+    SetRespondLabel.pack(side=LEFT, pady=5, padx=10)
+    RespondWarning = ttk.Label(RespondFrame, text='заполните это поле', foreground='#ff0000')
+    SetRespondEntry = ttk.Entry(frame, width=50, validate='focusout')
+    SetRespondEntry.pack(side=TOP, anchor=W, pady=5)
+    form_data = (SetNameEntry, SetUrlEntry, entries, SetRespondEntry)
+    submit_button = ttk.Button(frame, text="Добавить", command=lambda: app_website(form_data, NameWarning, UrlWarning, CommandWarning, RespondWarning))
+    submit_button.pack(side=TOP, anchor=W, pady=5)
+    frames['add_website'] = frame
 
 def create_dynamic_state(state):
     global command_list, command_vars
@@ -297,6 +382,8 @@ def main():
     commands_settings.add_command(label="Список команд", command=lambda: set_state('show_commands'))
     commands_settings.add_command(label="Изменить голосовые команды", command=lambda: set_state('change_voice_commands'))
     commands_settings.add_command(label="Изменить реакцию ассистента", command=lambda: set_state('change_assistant_respond'))
+    commands_settings.add_command(label="Добавить приложения", command=lambda: set_state('add_app'))
+    commands_settings.add_command(label="Добавить вебсайт", command=lambda: set_state('add_website'))
 
     frames = {}
     create_states()
