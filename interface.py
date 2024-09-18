@@ -63,16 +63,14 @@ def change_settings(label, value):
     with open(user_prefs_dir, 'w') as file:
         file.write(json_string)
 
-def change_voice_command(command_vars):
-    global command_list
-    print(command_vars)
+def change_voice_command():
+    global command_list, command_vars
     temp_dict = {}
     for row in command_vars:
         if not row[0].cget("text") in temp_dict:
             temp_dict[row[0].cget("text")] = {}
         if row[1] == '':
             for i in range (5):
-                print(row[3][i])
                 try:
                     row[3][i] = row[3][i].get()
                 except:
@@ -90,6 +88,26 @@ def change_voice_command(command_vars):
             temp_dict[row[0].cget("text")][row[1].cget("text")]["name"] = row[2].cget('text')
             temp_dict[row[0].cget("text")][row[1].cget("text")]["user"] = row[3]
             temp_dict[row[0].cget("text")][row[1].cget("text")]["assistant"] = command_list[row[0].cget("text")][row[1].cget("text")]["assistant"]
+    command_list = temp_dict
+    json_string = json.dumps(command_list, indent=4)
+    with open(command_list_dir, "w", encoding='utf-8') as f:
+        f.write(json_string)
+
+def change_assistant_respond():
+    global command_list, command_vars
+    temp_dict = {}
+    for row in command_vars:
+        if not row[0].cget("text") in temp_dict:
+            temp_dict[row[0].cget("text")] = {}
+        if row[1] == '':
+            temp_dict[row[0].cget("text")]["name"] = row[2].cget('text')
+            temp_dict[row[0].cget("text")]["user"] = command_list[row[0].cget("text")]["user"]
+            temp_dict[row[0].cget("text")]["assistant"] = row[3].get()
+        else:
+            temp_dict[row[0].cget("text")][row[1].cget("text")] = {}
+            temp_dict[row[0].cget("text")][row[1].cget("text")]["name"] = row[2].cget('text')
+            temp_dict[row[0].cget("text")][row[1].cget("text")]["user"] = command_list[row[0].cget("text")][row[1].cget("text")]["user"]
+            temp_dict[row[0].cget("text")][row[1].cget("text")]["assistant"] = row[3].get()
     command_list = temp_dict
     json_string = json.dumps(command_list, indent=4)
     with open(command_list_dir, "w", encoding='utf-8') as f:
@@ -181,11 +199,11 @@ def create_dynamic_state(state):
                     row.pack(side=TOP, anchor=NW)
                     command = ttk.Label(row, text=c)
                     arg = ttk.Label(row, text=c1)
-                    label = ttk.Label(row, text = v1['name'] + ':', width = 30)
+                    label = ttk.Label(row, text = v1['name'], width = 30)
                     label.pack(side=LEFT)
                     entries = []
                     for i in range(5):
-                        entry_command = ttk.Entry(row, width = 20, validate="focusout", validatecommand= lambda: change_voice_command(command_vars))
+                        entry_command = ttk.Entry(row, width = 20, validate="focusout", validatecommand=change_voice_command)
                         entry_command.pack(side=LEFT, padx=5)
                         try:
                             entry_command.delete(0, END)
@@ -199,11 +217,11 @@ def create_dynamic_state(state):
                 row = ttk.Frame(frame)
                 row.pack(side=TOP, anchor=NW)
                 command = ttk.Label(row, text=c, width=30)
-                label = ttk.Label(row, text=v['name'] + ':', width=30)
+                label = ttk.Label(row, text=v['name'], width=30)
                 label.pack(side=LEFT)
                 entries = []
                 for i in range(5):
-                    entry_command = ttk.Entry(row, width=20,validate="focusout", validatecommand=lambda: change_voice_command(command_vars))
+                    entry_command = ttk.Entry(row, width=20,validate="focusout", validatecommand=change_voice_command)
                     entry_command.pack(side=LEFT, padx=5)
                     try:
                         entry_command.delete(0, END)
@@ -213,11 +231,33 @@ def create_dynamic_state(state):
                     finally:
                         entries.append(entry_command)
                 command_vars.append((command, "", label, entries))
-
-
-
     elif state == "change_assistant_respond":
-        pass
+        command_vars = []
+        for c, v in command_list.items():
+            if not 'user' in v:
+                for c1, v1 in v.items():
+                    row = ttk.Frame(frame)
+                    row.pack(side=TOP, anchor=NW)
+                    command = ttk.Label(row, text=c)
+                    arg = ttk.Label(row, text=c1)
+                    label = ttk.Label(row, text=v1['name'], width=30)
+                    label.pack(side=LEFT)
+                    entry_command = ttk.Entry(row, width=100, validate="focusout",validatecommand=change_assistant_respond)
+                    entry_command.pack(side=LEFT, padx=5)
+                    entry_command.delete(0, END)
+                    entry_command.insert(0, v1['assistant'])
+                    command_vars.append((command, arg, label, entry_command))
+            else:
+                row = ttk.Frame(frame)
+                row.pack(side=TOP, anchor=NW)
+                command = ttk.Label(row, text=c, width=30)
+                label = ttk.Label(row, text=v['name'], width=30)
+                label.pack(side=LEFT)
+                entry_command = ttk.Entry(row, width=100, validate="focusout", validatecommand=change_assistant_respond)
+                entry_command.pack(side=LEFT, padx=5)
+                entry_command.delete(0, END)
+                entry_command.insert(0, v['assistant'])
+                command_vars.append((command, "", label, entry_command))
     frames[state] = frame
 
 
