@@ -18,6 +18,7 @@ STATIC_STATES = ['home', 'settings']
 DYNAMIC_STATES = ['show_commands', "change_voice_commands", "change_assistant_respond"]
 ALL_SPEAKERS = ['aidar', 'baya', 'kseniya', 'xenia']
 current_state = ''
+command_vars = []
 closed = False
 
 def simulate_loading(duration = 5):
@@ -62,6 +63,38 @@ def change_settings(label, value):
     with open(user_prefs_dir, 'w') as file:
         file.write(json_string)
 
+def change_voice_command(command_vars):
+    global command_list
+    print(command_vars)
+    temp_dict = {}
+    for row in command_vars:
+        if not row[0].cget("text") in temp_dict:
+            temp_dict[row[0].cget("text")] = {}
+        if row[1] == '':
+            for i in range (5):
+                print(row[3][i])
+                try:
+                    row[3][i] = row[3][i].get()
+                except:
+                    pass
+            temp_dict[row[0].cget("text")]["name"] = row[2].cget('text')
+            temp_dict[row[0].cget("text")]["user"] = row[3]
+            temp_dict[row[0].cget("text")]["assistant"] = command_list[row[0].cget("text")]["assistant"]
+        else:
+            temp_dict[row[0].cget("text")][row[1].cget("text")] = {}
+            for i in range (5):
+                try:
+                    row[3][i] = row[3][i].get()
+                except:
+                    pass
+            temp_dict[row[0].cget("text")][row[1].cget("text")]["name"] = row[2].cget('text')
+            temp_dict[row[0].cget("text")][row[1].cget("text")]["user"] = row[3]
+            temp_dict[row[0].cget("text")][row[1].cget("text")]["assistant"] = command_list[row[0].cget("text")][row[1].cget("text")]["assistant"]
+    command_list = temp_dict
+    json_string = json.dumps(command_list, indent=4)
+    with open(command_list_dir, "w", encoding='utf-8') as f:
+        f.write(json_string)
+
 def do_startup_change():
     state = startupVar.get()
     change_settings('isStartup', state)
@@ -95,13 +128,13 @@ def create_states():
 
 
 def create_dynamic_state(state):
-    global command_list
+    global command_list, command_vars
+    frame = Frame(window)
     if state == 'show_commands':
-        frame = Frame(window)
 
         columns = ("name", "v1", "v2", "v3", "v4", "v5", "r1")
-        tree = ttk.Treeview(frame, columns=columns, show="headings", height=500)
-        tree.pack(side=LEFT, anchor=NW)
+        tree = ttk.Treeview(frame, columns=columns, show="headings", height=20)
+        tree.grid(row=0, column=0, sticky='nsew')
 
         # определяем заголовки
         tree.heading("name", text="Команда")
@@ -118,9 +151,9 @@ def create_dynamic_state(state):
         tree.column("#5", stretch=NO, width=115)
         tree.column("#6", stretch=NO, width=115)
         tree.column("#7", stretch=NO, width=260)
-        for c, v in command_list.items():
+        for v in command_list.values():
             if not 'user' in v:
-                for c1, v1 in v.items():
+                for v1 in v.values():
                     name = v1['name']
                     voices = [""] * 5
                     for i in range(len(v1['user'])):
@@ -138,27 +171,68 @@ def create_dynamic_state(state):
                 tree.insert("",END,values=command)
         scrollbar = ttk.Scrollbar(frame, orient=VERTICAL, command=tree.yview)
         tree.configure(yscrollcommand=scrollbar.set)
-        scrollbar.pack(side=LEFT)
+        scrollbar.grid(row=0, column=1, sticky='ns')
     elif state == "change_voice_commands":
-        pass
+        command_vars = []
+        for c, v in command_list.items():
+            if not 'user' in v:
+                for c1, v1 in v.items():
+                    row = ttk.Frame(frame)
+                    row.pack(side=TOP, anchor=NW)
+                    command = ttk.Label(row, text=c)
+                    arg = ttk.Label(row, text=c1)
+                    label = ttk.Label(row, text = v1['name'] + ':', width = 30)
+                    label.pack(side=LEFT)
+                    entries = []
+                    for i in range(5):
+                        entry_command = ttk.Entry(row, width = 20, validate="focusout", validatecommand= lambda: change_voice_command(command_vars))
+                        entry_command.pack(side=LEFT, padx=5)
+                        try:
+                            entry_command.delete(0, END)
+                            entry_command.insert(0, v1['user'][i])
+                        except:
+                            pass
+                        finally:
+                            entries.append(entry_command)
+                    command_vars.append((command, arg, label, entries))
+            else:
+                row = ttk.Frame(frame)
+                row.pack(side=TOP, anchor=NW)
+                command = ttk.Label(row, text=c, width=30)
+                label = ttk.Label(row, text=v['name'] + ':', width=30)
+                label.pack(side=LEFT)
+                entries = []
+                for i in range(5):
+                    entry_command = ttk.Entry(row, width=20,validate="focusout", validatecommand=lambda: change_voice_command(command_vars))
+                    entry_command.pack(side=LEFT, padx=5)
+                    try:
+                        entry_command.delete(0, END)
+                        entry_command.insert(0, v['user'][i])
+                    except:
+                        pass
+                    finally:
+                        entries.append(entry_command)
+                command_vars.append((command, "", label, entries))
+
+
+
     elif state == "change_assistant_respond":
         pass
     frames[state] = frame
 
 
 def set_state(state):
-    print(frames)
     for key, frame in frames.items():
         if key in DYNAMIC_STATES:
-            for widget in frame.winfo_children():
-                print(1)
-                widget.destroy()
             frame.destroy()
         else:
             frame.pack_forget()
     if state in DYNAMIC_STATES:
         create_dynamic_state(state)
-    frames[state].pack(fill='both', expand=True)
+    try:
+        frames[state].pack(fill='both', expand=True)
+    except:
+        frames[state].grid(row=0, column=0)
 
 
 def main():
@@ -181,6 +255,9 @@ def main():
     settings_exit.add_command(label="Выход", command=close_app)
     menu_bar.add_cascade(label='Команды', menu=commands_settings)
     commands_settings.add_command(label="Список команд", command=lambda: set_state('show_commands'))
+    commands_settings.add_command(label="Изменить голосовые команды", command=lambda: set_state('change_voice_commands'))
+    commands_settings.add_command(label="Изменить реакцию ассистента", command=lambda: set_state('change_assistant_respond'))
+
     frames = {}
     create_states()
     set_state('home')
