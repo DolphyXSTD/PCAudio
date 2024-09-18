@@ -9,7 +9,7 @@ def command(app):
     for proc in psutil.process_iter(['pid', 'name']):
         if proc.info['name'] == app:
             try:
-                tts_module.speak(command_list['close_app'][app]['assistant'])
                 proc.terminate()
+                tts_module.speak(command_list['close_app'][app]['assistant'])
             except:
                 pass

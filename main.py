@@ -30,9 +30,6 @@ isWorking = False
 start_work = 0
 work_time = 15
 
-# Gets all commands and jsons
-with open(command_list_dir, "r", encoding='utf-8') as file:
-    command_list = json.load(file)
 with open(modules.find_path("numbers.json"), "r", encoding='utf-8') as file:
     number_list = json.load(file)
 module_files = [f for f in os.listdir(find_path('commands')) if f.endswith('.py')]
@@ -61,6 +58,8 @@ def listen(rec, callback):
 
 #listens commands
 def listen_command(raw_voice, fullCommand):
+    with open(command_list_dir, "r", encoding='utf-8') as file:
+        command_list = json.load(file)
     global start_work, work_time, isWorking
     if start_work > 0:
         if time.time() > start_work + work_time:
@@ -72,7 +71,7 @@ def listen_command(raw_voice, fullCommand):
             voice.remove(t)
     voice = "".join(voice)
     command = modules.levenshtein(voice, command_list)
-    print(raw_voice,command,fullCommand)
+    #print(raw_voice,command,fullCommand)
     if isWorking and fullCommand:
         try:
             if command['cmd'] in command_list and command['cmd'] != 'start':
