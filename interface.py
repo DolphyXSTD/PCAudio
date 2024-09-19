@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import time
 import json
 import sys
@@ -20,7 +20,6 @@ ALL_SPEAKERS = ['aidar', 'baya', 'kseniya', 'xenia']
 current_state = ''
 command_vars = []
 closed = False
-
 def simulate_loading(duration = 5):
     state = 0
     end_i = 0
@@ -52,10 +51,45 @@ def simulate_loading(duration = 5):
     progress_bar.destroy()
     label.destroy()
 
-def close_app():
-    global window, closed
-    closed = True
+def close_app(window):
+    global closed
     window.destroy()
+    closed = True
+def save_data(command_list):
+    json_string = json.dumps(command_list, indent=4)
+    with open(command_list_dir, "w", encoding='utf-8') as f:
+        f.write(json_string)
+def populate_listboxes():
+    apps_listbox.delete(0, END)
+    webs_listbox.delete(0, END)
+    for item in command_list['open_website'].values():
+        webs_listbox.insert(END, item['name'])
+    for item in command_list['open_app'].values():
+        apps_listbox.insert(END, item['name'])
+def delete_item():
+    appSelected = apps_listbox.curselection()
+    webSelected = webs_listbox.curselection()
+    cnt = 0
+    print(appSelected)
+    if appSelected != ():
+        for key in command_list['open_app'].keys():
+            if cnt == appSelected[0]:
+                print(1)
+                del command_list['open_app'][key]
+                del command_list['close_app'][key.lower()]
+                break
+            cnt += 1
+        populate_listboxes()
+    elif webSelected != ():
+        for key in command_list['open_website'].keys():
+            if cnt == webSelected[0]:
+                del command_list['open_website'][key]
+                break
+            cnt += 1
+        populate_listboxes()
+    else:
+        messagebox.showwarning("Не выбран элемент", "Выберите элемент для удаления")
+    save_data(command_list)
 
 def change_settings(label, value):
     user_prefs[label] = value
@@ -89,9 +123,7 @@ def change_voice_command():
             temp_dict[row[0].cget("text")][row[1].cget("text")]["user"] = row[3]
             temp_dict[row[0].cget("text")][row[1].cget("text")]["assistant"] = command_list[row[0].cget("text")][row[1].cget("text")]["assistant"]
     command_list = temp_dict
-    json_string = json.dumps(command_list, indent=4)
-    with open(command_list_dir, "w", encoding='utf-8') as f:
-        f.write(json_string)
+    save_data(command_list)
 
 def change_assistant_respond():
     global command_list, command_vars
@@ -109,9 +141,7 @@ def change_assistant_respond():
             temp_dict[row[0].cget("text")][row[1].cget("text")]["user"] = command_list[row[0].cget("text")][row[1].cget("text")]["user"]
             temp_dict[row[0].cget("text")][row[1].cget("text")]["assistant"] = row[3].get()
     command_list = temp_dict
-    json_string = json.dumps(command_list, indent=4)
-    with open(command_list_dir, "w", encoding='utf-8') as f:
-        f.write(json_string)
+    save_data(command_list)
 
 def add_website(form_data, name, url, command, respond):
     global command_list
@@ -152,10 +182,7 @@ def add_website(form_data, name, url, command, respond):
         temp_dist['user'] = form_data[2]
         temp_dist['assistant'] = form_data[3].get()
         command_list['open_website'][form_data[1].get()] = temp_dist
-        print(temp_dist)
-        json_string = json.dumps(command_list, indent=4)
-        with open(command_list_dir, "w", encoding='utf-8') as file:
-            file.write(json_string)
+        save_data(command_list)
 
 def add_app(form_data, excLeft, excRight):
     print(form_data)
@@ -215,9 +242,7 @@ def add_app(form_data, excLeft, excRight):
                 command_list['open_app'][form_data[0][1].get()] = temp_dist
             else:
                 command_list['close_app'][form_data[1][1].get().lower()] = temp_dist
-        json_string = json.dumps(command_list, indent=4)
-        with open(command_list_dir, "w", encoding='utf-8') as file:
-            file.write(json_string)
+        save_data(command_list)
 
 
 def do_startup_change():
@@ -488,7 +513,33 @@ def create_dynamic_state(state):
                 entry_command.insert(0, v['assistant'])
                 command_vars.append((command, "", label, entry_command))
     elif state == "show_apps_and_webs":
-        pass
+        global apps_listbox, webs_listbox
+        AppLabel = ttk.Label(frame, text="Добавленные приложения", font=('Arial', 18))
+        AppLabel.pack(anchor=NW, pady=5)
+        inner_frame = ttk.Frame(frame)
+        inner_frame.pack(anchor=N, fill=X, expand=True)
+        apps_listbox = Listbox(inner_frame, selectmode=SINGLE, height=10)
+        apps_listbox.pack(side=LEFT, fill=X, anchor=N, expand=True)
+
+        # Add a scrollbar to the apps listbox
+        apps_scrollbar = Scrollbar(inner_frame, orient=VERTICAL, command=apps_listbox.yview)
+        apps_scrollbar.pack(side=RIGHT, fill=Y)
+        apps_listbox.config(yscrollcommand=apps_scrollbar.set)
+        WebLabel = ttk.Label(frame, text="Добавленные вебсайты", font=('Arial', 18))
+        WebLabel.pack(anchor=NW, pady=5)
+        inner_frame2 = ttk.Frame(frame)
+        inner_frame2.pack(anchor=N, fill=X, expand=True)
+        webs_listbox = Listbox(inner_frame2, selectmode=SINGLE, height=10)
+        webs_listbox.pack(side=LEFT, fill=X,anchor=N, expand=True)
+
+        # Add a scrollbar to the webs listbox
+        webs_scrollbar = Scrollbar(inner_frame2, orient=VERTICAL, command=webs_listbox.yview)
+        webs_scrollbar.pack(side=RIGHT, fill=Y)
+        webs_listbox.config(yscrollcommand=webs_scrollbar.set)
+
+        populate_listboxes()
+        delete_button = Button(frame, text="Delete", command=delete_item)
+        delete_button.pack(side=LEFT, pady=5)
     frames[state] = frame
 
 
@@ -514,7 +565,6 @@ def main():
     simulate_loading()
 
     window.geometry('1000x550')
-    window.protocol("WM_DELETE_WINDOW", close_app)
 
     menu_bar = Menu(window)
     window.config(menu=menu_bar)
@@ -524,7 +574,7 @@ def main():
     menu_bar.add_cascade(label='Меню', menu=settings_exit)
     settings_exit.add_command(label="Главная", command=lambda: set_state('home'))
     settings_exit.add_command(label="Настройки", command=lambda: set_state('settings'))
-    settings_exit.add_command(label="Выход", command=close_app)
+    settings_exit.add_command(label="Выход", command=lambda: close_app(window))
     menu_bar.add_cascade(label='Команды', menu=commands_settings)
     commands_settings.add_command(label="Список команд", command=lambda: set_state('show_commands'))
     commands_settings.add_command(label="Изменить голосовые команды", command=lambda: set_state('change_voice_commands'))

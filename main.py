@@ -54,7 +54,7 @@ def listen(rec, callback):
             else:
                 callback(json.loads(rec.PartialResult())["partial"], False)
             if interface.closed:
-                sys.exit()
+                sys.exit(0)
 
 #listens commands
 def listen_command(raw_voice, fullCommand):
