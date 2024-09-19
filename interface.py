@@ -113,7 +113,7 @@ def change_assistant_respond():
     with open(command_list_dir, "w", encoding='utf-8') as f:
         f.write(json_string)
 
-def app_website(form_data, name, url, command, respond):
+def add_website(form_data, name, url, command, respond):
     global command_list
     print(form_data[0].get(), form_data[1].get())
     name.pack_forget()
@@ -157,6 +157,68 @@ def app_website(form_data, name, url, command, respond):
         with open(command_list_dir, "w", encoding='utf-8') as file:
             file.write(json_string)
 
+def add_app(form_data, excLeft, excRight):
+    print(form_data)
+    global command_list
+
+    for i in excLeft:
+        i.pack_forget()
+    for i in excRight:
+        i.pack_forget()
+
+    exception = False
+    if not form_data[0][0].get():
+        excLeft[0].pack(anchor=W)
+        exception = True
+    if not form_data[1][0].get():
+        excLeft[0].pack(anchor=W)
+        exception = True
+    got_command = False
+    for i in range(5):
+        if form_data[0][2][i].get() != "":
+            got_command = True
+            break
+    if not got_command:
+        excLeft[2].pack(anchor=W)
+        exception = True
+    if not form_data[0][3].get():
+        excLeft[3].pack(anchor=W)
+        exception = True
+    if not form_data[1][0].get():
+        excRight[0].pack(anchor=W)
+        exception = True
+    got_command = False
+    for i in range(5):
+        if form_data[1][2][i].get() != "":
+            got_command = True
+            break
+    if not got_command:
+        excRight[2].pack(anchor=W)
+        exception = True
+    if not form_data[1][3].get():
+        excRight[3].pack(anchor=W)
+        exception = True
+    if exception:
+        return
+
+    if not form_data[0][1].get() in command_list['open_app']:
+        for i in range(2):
+            temp_dist = {'name': form_data[i][0].get()}
+            for j in range(5):
+                try:
+                    form_data[i][2][j] = form_data[i][2][j].get()
+                except:
+                    pass
+            temp_dist['user'] = form_data[i][2]
+            temp_dist['assistant'] = form_data[i][3].get()
+            if i==0:
+                command_list['open_app'][form_data[0][1].get()] = temp_dist
+            else:
+                command_list['close_app'][form_data[1][1].get().lower()] = temp_dist
+        json_string = json.dumps(command_list, indent=4)
+        with open(command_list_dir, "w", encoding='utf-8') as file:
+            file.write(json_string)
+
 
 def do_startup_change():
     state = startupVar.get()
@@ -189,10 +251,75 @@ def create_states():
     SoftName.pack()
     frames['home'] = frame
 
-    #add_website
+    #add_app
+    frame = ttk.Frame(window)
+    Label = ttk.Label(frame, text="Добавить приложение", font=("Arial", 25))
+    Label.grid(row=0, column=1, sticky = "n")
+
+    Column1 = ttk.Frame(frame)
+    Column1.grid(row=1,column=0,pady=5)
+    Column2 = ttk.Frame(frame)
+    Column2.grid(row=1, column=2, pady=5)
+    DefLabelLeft = ttk.Label(Column1, text="Открыть приложение", font=("Arial", 17))
+    DefLabelLeft.pack(side=TOP, anchor=W, pady=5)
+    DefLabelRight = ttk.Label(Column2, text="Закрыть приложение", font=("Arial", 17))
+    DefLabelRight.pack(side=TOP, anchor=W, pady=5)
+    SetNameLabelLeft = ttk.Label(Column1, text="Добавить имя команды", font=("Arial", 15))
+    SetNameLabelLeft.pack(side=TOP, anchor=W, pady=5)
+    SetNameLabelRight = ttk.Label(Column2, text="Добавить имя команды", font=("Arial", 15))
+    SetNameLabelRight.pack(side=TOP, anchor=W, pady=5)
+    NameWarningLeft = ttk.Label(Column1, text='заполните это поле', foreground='#ff0000')
+    NameWarningRight = ttk.Label(Column2, text='заполните это поле', foreground='#ff0000')
+    SetNameEntryLeft = ttk.Entry(Column1, width=50, validate='focusout')
+    SetNameEntryLeft.pack(side=TOP, anchor=W, pady=5)
+    SetNameEntryRight = ttk.Entry(Column2, width=50, validate='focusout')
+    SetNameEntryRight.pack(side=TOP, anchor=W, pady=5)
+
+    SetExeLabel = ttk.Label(Column1, text="Добавить исполняемый файл", font=("Arial", 15))
+    SetExeLabel.pack(side=TOP, anchor=W, pady=5)
+    ExeWarning = ttk.Label(Column1, text='заполните это поле', foreground='#ff0000')
+    SetExeEntry = ttk.Entry(Column1, width=50, validate='focusout')
+    SetExeEntry.pack(side=TOP, anchor=W, pady=5)
+
+    SetCommandLabelLeft = ttk.Label(Column1, text="Добавить команды", font=("Arial", 15))
+    SetCommandLabelLeft.pack(side=TOP, anchor=W, pady=5)
+    SetCommandLabelRight = ttk.Label(Column2, text="Добавить команды", font=("Arial", 15))
+    SetCommandLabelRight.pack(side=TOP, anchor=W, pady=5)
+    CommandWarningLeft = ttk.Label(Column1, text='заполните это поле', foreground='#ff0000')
+    CommandWarningRight = ttk.Label(Column2, text='заполните это поле', foreground='#ff0000')
+    entriesLeft = []
+    entriesRight = []
+    for i in range(5):
+        SetCommandEntryLeft = ttk.Entry(Column1, width=50, validate='focusout')
+        SetCommandEntryLeft.pack(side=TOP, anchor=W, pady=5)
+        SetCommandEntryRight = ttk.Entry(Column2, width=50, validate='focusout')
+        SetCommandEntryRight.pack(side=TOP, anchor=W, pady=5)
+        entriesLeft.append(SetCommandEntryLeft)
+        entriesRight.append(SetCommandEntryRight)
+
+    SetRespondLabelLeft = ttk.Label(Column1, text="Добавить ответ ассистента", font=("Arial", 15))
+    SetRespondLabelLeft.pack(side=TOP, anchor=W, pady=5)
+    SetRespondLabelRight = ttk.Label(Column2, text="Добавить ответ ассистента", font=("Arial", 15))
+    SetRespondLabelRight.pack(side=TOP, anchor=W, pady=5)
+    RespondWarningLeft = ttk.Label(Column1, text='заполните это поле', foreground='#ff0000')
+    RespondWarningRight = ttk.Label(Column2, text='заполните это поле', foreground='#ff0000')
+    SetRespondEntryLeft = ttk.Entry(Column1, width=50, validate='focusout')
+    SetRespondEntryLeft.pack(side=TOP, anchor=W, pady=5)
+    SetRespondEntryRight = ttk.Entry(Column2, width=50, validate='focusout')
+    SetRespondEntryRight.pack(side=TOP, anchor=W, pady=5)
+
+    app_form_data = [(SetNameEntryLeft, SetExeEntry, entriesLeft, SetRespondEntryLeft),(SetNameEntryRight, SetExeEntry, entriesRight, SetRespondEntryRight)]
+    exceptionsLeft = (NameWarningLeft, ExeWarning, CommandWarningLeft, RespondWarningLeft)
+    exceptionsRight = (NameWarningRight, ExeWarning, CommandWarningRight, RespondWarningRight)
+    submit_button = ttk.Button(Column2, text="Добавить", command=lambda: add_app(app_form_data, exceptionsLeft, exceptionsRight))
+    submit_button.pack(side=TOP, anchor=W, pady=5)
+    frames['add_app'] = frame
+
+    # add_website
     frame = ttk.Frame(window)
     Label = ttk.Label(frame, text="Добавить вебсайт", font=("Arial", 25))
     Label.pack()
+
     NameFrame = ttk.Frame(frame)
     NameFrame.pack(side=TOP, anchor=W, pady=5)
     SetNameLabel = ttk.Label(NameFrame, text="Добавить имя команды", font=("Arial", 15))
@@ -200,6 +327,7 @@ def create_states():
     NameWarning = ttk.Label(NameFrame, text='заполните это поле', foreground='#ff0000')
     SetNameEntry = ttk.Entry(frame, width=50, validate='focusout')
     SetNameEntry.pack(side=TOP, anchor=W, pady=5)
+
     UrlFrame = ttk.Frame(frame)
     UrlFrame.pack(side=TOP, anchor=W, pady=5)
     SetUrlLabel = ttk.Label(UrlFrame, text="Добавить ссылку на сайт", font=("Arial", 15))
@@ -207,17 +335,18 @@ def create_states():
     UrlWarning = ttk.Label(UrlFrame, text='заполните это поле', foreground='#ff0000')
     SetUrlEntry = ttk.Entry(frame, width=50, validate='focusout')
     SetUrlEntry.pack(side=TOP, anchor=W, pady=5)
+
     CommandFrame = ttk.Frame(frame)
     CommandFrame.pack(side=TOP, anchor=W, pady=5)
     SetCommandLabel = ttk.Label(CommandFrame, text="Добавить команды", font=("Arial", 15))
     SetCommandLabel.pack(side=LEFT, padx=10)
     CommandWarning = ttk.Label(CommandFrame, text='заполните это поле', foreground='#ff0000')
-
     entries = []
     for i in range(5):
         SetCommandEntry = ttk.Entry(frame, width=50, validate='focusout')
         SetCommandEntry.pack(side=TOP, anchor=W, pady=5)
         entries.append(SetCommandEntry)
+
     RespondFrame = ttk.Frame(frame)
     RespondFrame.pack(side=TOP, anchor=W, pady=5)
     SetRespondLabel = ttk.Label(RespondFrame, text="Добавить ответ ассистента", font=("Arial", 15))
@@ -225,8 +354,9 @@ def create_states():
     RespondWarning = ttk.Label(RespondFrame, text='заполните это поле', foreground='#ff0000')
     SetRespondEntry = ttk.Entry(frame, width=50, validate='focusout')
     SetRespondEntry.pack(side=TOP, anchor=W, pady=5)
+
     form_data = (SetNameEntry, SetUrlEntry, entries, SetRespondEntry)
-    submit_button = ttk.Button(frame, text="Добавить", command=lambda: app_website(form_data, NameWarning, UrlWarning, CommandWarning, RespondWarning))
+    submit_button = ttk.Button(frame, text="Добавить", command=lambda: add_website(form_data, NameWarning, UrlWarning, CommandWarning,RespondWarning))
     submit_button.pack(side=TOP, anchor=W, pady=5)
     frames['add_website'] = frame
 

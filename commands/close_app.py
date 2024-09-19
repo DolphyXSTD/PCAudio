@@ -12,4 +12,4 @@ def command(app):
                 proc.terminate()
                 tts_module.speak(command_list['close_app'][app]['assistant'])
             except:
-                pass
+                tts_module.speak("Файл не найден")
