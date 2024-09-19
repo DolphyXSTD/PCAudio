@@ -1,12 +1,15 @@
+#modules for all the scripts
 from fuzzywuzzy import fuzz
 import json
 import winreg
 from pkg_resources import resource_filename
 
+#finds path in onefile exe
 def find_path(file_name):
     file_path = resource_filename(__name__, file_name)
     return file_path
 
+#adds to Windows startup apps
 def add_to_startup(program_name, program_path):
     try:
         key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0,
@@ -15,7 +18,7 @@ def add_to_startup(program_name, program_path):
         winreg.CloseKey(key)
     finally:
         pass
-
+#removes from Windows startup apps
 def remove_from_startup(program_name):
     try:
         key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", 0,
@@ -36,7 +39,7 @@ def create_text_of_nums(dictionary, values):
                 text += key
     return text
 
-
+#sums listened numbers by some rules
 def sum_numbers(nums):
     wait_for = False
     summa = 0
@@ -56,6 +59,7 @@ def sum_numbers(nums):
             return used_nums, summa
     return used_nums, summa
 
+#listens for numbers
 def fetch_numbers(cmd: str):
     cmd = cmd.split(' ')
     record_nums = 'start'
@@ -73,6 +77,7 @@ def fetch_numbers(cmd: str):
                 record_nums = 'end'
     return nums
 
+#formats functions data for correct understanding
 def get_number(cmd):
     nums = fetch_numbers(cmd)
     if not nums:

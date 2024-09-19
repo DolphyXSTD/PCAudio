@@ -14,16 +14,17 @@ with open(command_list_dir, 'r', encoding='utf-8') as file:
 if getattr(sys, 'frozen', False):
     exe_path = sys.executable
 
-STATIC_STATES = ['home', 'settings', 'add_app', 'add_website']
+STATIC_STATES = ['home', 'settings', 'help', 'add_app', 'add_website']
 DYNAMIC_STATES = ['show_commands', "change_voice_commands", "change_assistant_respond", "show_apps_and_webs"]
 ALL_SPEAKERS = ['aidar', 'baya', 'kseniya', 'xenia']
 current_state = ''
 command_vars = []
 closed = False
+
+#start loading models progress bar
 def simulate_loading(duration = 5):
     state = 0
     end_i = 0
-
     progress_bar = ttk.Progressbar(window, orient="horizontal", length=300, mode="determinate")
     progress_bar.pack(pady=10)
     label = Label(window, text="")
@@ -51,14 +52,30 @@ def simulate_loading(duration = 5):
     progress_bar.destroy()
     label.destroy()
 
+#custom closing function
 def close_app(window):
     global closed
     window.destroy()
     closed = True
+
+def toggle_bot():
+    if ToggleBot.get():
+        ToggleBot.set(False)
+        ToggleButton.configure(text='Включить ассистента')
+        ToggleBotLabel.configure(text='Сейчас ассистент неактивен')
+    else:
+        ToggleBot.set(True)
+        ToggleButton.configure(text='Выключить ассистента')
+        ToggleBotLabel.configure(text='Сейчас ассистент активен')
+
+
+#saves recent data about all commands
 def save_data(command_list):
     json_string = json.dumps(command_list, indent=4)
     with open(command_list_dir, "w", encoding='utf-8') as f:
         f.write(json_string)
+
+#apps and webs listbox showing
 def populate_listboxes():
     apps_listbox.delete(0, END)
     webs_listbox.delete(0, END)
@@ -66,6 +83,8 @@ def populate_listboxes():
         webs_listbox.insert(END, item['name'])
     for item in command_list['open_app'].values():
         apps_listbox.insert(END, item['name'])
+
+#apps and webs deleting function
 def delete_item():
     appSelected = apps_listbox.curselection()
     webSelected = webs_listbox.curselection()
@@ -91,12 +110,14 @@ def delete_item():
         messagebox.showwarning("Не выбран элемент", "Выберите элемент для удаления")
     save_data(command_list)
 
+#settings saving to JSON
 def change_settings(label, value):
     user_prefs[label] = value
     json_string = json.dumps(user_prefs, indent=4)
     with open(user_prefs_dir, 'w') as file:
         file.write(json_string)
 
+#voice commands list rewrite
 def change_voice_command():
     global command_list, command_vars
     temp_dict = {}
@@ -125,6 +146,7 @@ def change_voice_command():
     command_list = temp_dict
     save_data(command_list)
 
+#assistant respond list rewrite
 def change_assistant_respond():
     global command_list, command_vars
     temp_dict = {}
@@ -143,6 +165,7 @@ def change_assistant_respond():
     command_list = temp_dict
     save_data(command_list)
 
+#web adding form with exceptions
 def add_website(form_data, name, url, command, respond):
     global command_list
     print(form_data[0].get(), form_data[1].get())
@@ -184,6 +207,7 @@ def add_website(form_data, name, url, command, respond):
         command_list['open_website'][form_data[1].get()] = temp_dist
         save_data(command_list)
 
+#app adding form submit with exceptions
 def add_app(form_data, excLeft, excRight):
     print(form_data)
     global command_list
@@ -244,7 +268,7 @@ def add_app(form_data, excLeft, excRight):
                 command_list['close_app'][form_data[1][1].get().lower()] = temp_dist
         save_data(command_list)
 
-
+#startup changing
 def do_startup_change():
     state = startupVar.get()
     change_settings('isStartup', state)
@@ -253,27 +277,36 @@ def do_startup_change():
     else:
         modules.remove_from_startup('pcAudio')
 
+#creates static states for all session
 def create_states():
     #settings
     frame = ttk.Frame(window)
-    label = ttk.Label(frame, text="Настройки", font="Arial 18")
-    label.pack()
+    label = ttk.Label(frame, text="Настройки", font=("Helvetica", 25))
+    label.pack(pady=5)
     global startupVar
     startupVar = BooleanVar(value=user_prefs['isStartup'])
-    startupCheckBox = Checkbutton(frame, text="Запускать при старте системы", variable=startupVar, command=do_startup_change)
+    startupCheckBox = Checkbutton(frame, text="Запускать при старте системы", variable=startupVar, command=do_startup_change ,font=("Helvetica", 12))
     startupCheckBox.pack()
-    label = ttk.Label(frame, text="Выбери голосового ассистента")
-    label.pack()
+    label = ttk.Label(frame, text="Выбери голосового ассистента", font=("Helvetica", 16))
+    label.pack(pady=10)
     global chosenSpeaker
     chosenSpeaker = StringVar(value=user_prefs['speaker'])
-    speakerSpinBox = ttk.Spinbox(frame, values=ALL_SPEAKERS, textvariable=chosenSpeaker, command= lambda: change_settings('speaker', chosenSpeaker.get()), wrap=True)
+    speakerSpinBox = ttk.Spinbox(frame, values=ALL_SPEAKERS, textvariable=chosenSpeaker, command= lambda: change_settings('speaker', chosenSpeaker.get()), wrap=True, font=("Helvetica", 12))
     speakerSpinBox.pack()
     frames['settings'] = frame
 
     #home
     frame = ttk.Frame(window)
-    SoftName = ttk.Label(frame, text="PCAudio", font=("Arial", 25))
-    SoftName.pack()
+    SoftName = ttk.Label(frame, text="PCAudio", font=("Helvetica", 25))
+    SoftName.pack(pady=5)
+    DescLabel = ttk.Label(frame, text="Начните использовать голосовое управление уже сегодня и сделайте вашу работу за компьютером еще более комфортной и продуктивной!", font=("Helvetica", 12), wraplength=1000, justify="center")
+    DescLabel.pack(side = TOP)
+    global ToggleBot, ToggleButton, ToggleBotLabel
+    ToggleBot = BooleanVar(value=True)
+    ToggleButton = Button(frame, text="Выключить ассистента", font=("Helvetica", 16), command=toggle_bot)
+    ToggleBotLabel = ttk.Label(frame, text="Cейчас ассистент активен", font=("Helvetica", 16))
+    ToggleBotLabel.pack(pady=30)
+    ToggleButton.pack()
     frames['home'] = frame
 
     #add_app
@@ -399,16 +432,17 @@ def create_states():
     submit_button.pack(side=TOP, anchor=W, pady=5)
     frames['add_website'] = frame
 
+#creates dynamic state for one time
 def create_dynamic_state(state):
     global command_list, command_vars
     frame = Frame(window)
+    #all commands table
     if state == 'show_commands':
 
         columns = ("name", "v1", "v2", "v3", "v4", "v5", "r1")
         tree = ttk.Treeview(frame, columns=columns, show="headings", height=20)
         tree.grid(row=0, column=0, sticky='nsew')
 
-        # определяем заголовки
         tree.heading("name", text="Команда")
         tree.heading("v1", text="Вариант 1")
         tree.heading("v2", text="Вариант 2")
@@ -444,6 +478,8 @@ def create_dynamic_state(state):
         scrollbar = ttk.Scrollbar(frame, orient=VERTICAL, command=tree.yview)
         tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.grid(row=0, column=1, sticky='ns')
+
+    #voice command changing form
     elif state == "change_voice_commands":
         command_vars = []
         for c, v in command_list.items():
@@ -485,6 +521,7 @@ def create_dynamic_state(state):
                     finally:
                         entries.append(entry_command)
                 command_vars.append((command, "", label, entries))
+    #assistant respond change form
     elif state == "change_assistant_respond":
         command_vars = []
         for c, v in command_list.items():
@@ -512,6 +549,7 @@ def create_dynamic_state(state):
                 entry_command.delete(0, END)
                 entry_command.insert(0, v['assistant'])
                 command_vars.append((command, "", label, entry_command))
+    #apps and webs deleting form
     elif state == "show_apps_and_webs":
         global apps_listbox, webs_listbox
         AppLabel = ttk.Label(frame, text="Добавленные приложения", font=('Arial', 18))
@@ -521,10 +559,10 @@ def create_dynamic_state(state):
         apps_listbox = Listbox(inner_frame, selectmode=SINGLE, height=10)
         apps_listbox.pack(side=LEFT, fill=X, anchor=N, expand=True)
 
-        # Add a scrollbar to the apps listbox
         apps_scrollbar = Scrollbar(inner_frame, orient=VERTICAL, command=apps_listbox.yview)
         apps_scrollbar.pack(side=RIGHT, fill=Y)
         apps_listbox.config(yscrollcommand=apps_scrollbar.set)
+
         WebLabel = ttk.Label(frame, text="Добавленные вебсайты", font=('Arial', 18))
         WebLabel.pack(anchor=NW, pady=5)
         inner_frame2 = ttk.Frame(frame)
@@ -532,7 +570,6 @@ def create_dynamic_state(state):
         webs_listbox = Listbox(inner_frame2, selectmode=SINGLE, height=10)
         webs_listbox.pack(side=LEFT, fill=X,anchor=N, expand=True)
 
-        # Add a scrollbar to the webs listbox
         webs_scrollbar = Scrollbar(inner_frame2, orient=VERTICAL, command=webs_listbox.yview)
         webs_scrollbar.pack(side=RIGHT, fill=Y)
         webs_listbox.config(yscrollcommand=webs_scrollbar.set)
@@ -542,7 +579,7 @@ def create_dynamic_state(state):
         delete_button.pack(side=LEFT, pady=5)
     frames[state] = frame
 
-
+#sets state depending on button
 def set_state(state):
     for key, frame in frames.items():
         if key in DYNAMIC_STATES:
@@ -566,6 +603,7 @@ def main():
 
     window.geometry('1000x550')
 
+    #main menu for changing states
     menu_bar = Menu(window)
     window.config(menu=menu_bar)
     settings_exit = Menu(menu_bar, tearoff=0)
@@ -574,6 +612,7 @@ def main():
     menu_bar.add_cascade(label='Меню', menu=settings_exit)
     settings_exit.add_command(label="Главная", command=lambda: set_state('home'))
     settings_exit.add_command(label="Настройки", command=lambda: set_state('settings'))
+    settings_exit.add_command(label="Помощь", command=lambda: set_state('help'))
     settings_exit.add_command(label="Выход", command=lambda: close_app(window))
     menu_bar.add_cascade(label='Команды', menu=commands_settings)
     commands_settings.add_command(label="Список команд", command=lambda: set_state('show_commands'))
