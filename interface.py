@@ -15,7 +15,7 @@ if getattr(sys, 'frozen', False):
     exe_path = sys.executable
 
 STATIC_STATES = ['home', 'settings', 'add_app', 'add_website']
-DYNAMIC_STATES = ['show_commands', "change_voice_commands", "change_assistant_respond"]
+DYNAMIC_STATES = ['show_commands', "change_voice_commands", "change_assistant_respond", "show_apps_and_webs"]
 ALL_SPEAKERS = ['aidar', 'baya', 'kseniya', 'xenia']
 current_state = ''
 command_vars = []
@@ -168,10 +168,10 @@ def add_app(form_data, excLeft, excRight):
 
     exception = False
     if not form_data[0][0].get():
-        excLeft[0].pack(anchor=W)
+        excLeft[0].pack(side=LEFT)
         exception = True
-    if not form_data[1][0].get():
-        excLeft[0].pack(anchor=W)
+    if not form_data[0][1].get():
+        excLeft[1].pack(side=LEFT)
         exception = True
     got_command = False
     for i in range(5):
@@ -179,13 +179,13 @@ def add_app(form_data, excLeft, excRight):
             got_command = True
             break
     if not got_command:
-        excLeft[2].pack(anchor=W)
+        excLeft[2].pack(side=LEFT)
         exception = True
     if not form_data[0][3].get():
-        excLeft[3].pack(anchor=W)
+        excLeft[3].pack(side=LEFT)
         exception = True
     if not form_data[1][0].get():
-        excRight[0].pack(anchor=W)
+        excRight[0].pack(side=LEFT)
         exception = True
     got_command = False
     for i in range(5):
@@ -193,10 +193,10 @@ def add_app(form_data, excLeft, excRight):
             got_command = True
             break
     if not got_command:
-        excRight[2].pack(anchor=W)
+        excRight[2].pack(side=LEFT)
         exception = True
     if not form_data[1][3].get():
-        excRight[3].pack(anchor=W)
+        excRight[3].pack(side=LEFT)
         exception = True
     if exception:
         return
@@ -254,39 +254,49 @@ def create_states():
     #add_app
     frame = ttk.Frame(window)
     Label = ttk.Label(frame, text="Добавить приложение", font=("Arial", 25))
-    Label.grid(row=0, column=1, sticky = "n")
+    Label.grid(row=0, column=1, sticky = "w")
 
     Column1 = ttk.Frame(frame)
-    Column1.grid(row=1,column=0,pady=5)
+    Column1.grid(row=1,column=0,pady=5, sticky="w")
     Column2 = ttk.Frame(frame)
-    Column2.grid(row=1, column=2, pady=5)
+    Column2.grid(row=1, column=2, pady=5, sticky="e")
     DefLabelLeft = ttk.Label(Column1, text="Открыть приложение", font=("Arial", 17))
     DefLabelLeft.pack(side=TOP, anchor=W, pady=5)
     DefLabelRight = ttk.Label(Column2, text="Закрыть приложение", font=("Arial", 17))
     DefLabelRight.pack(side=TOP, anchor=W, pady=5)
-    SetNameLabelLeft = ttk.Label(Column1, text="Добавить имя команды", font=("Arial", 15))
-    SetNameLabelLeft.pack(side=TOP, anchor=W, pady=5)
-    SetNameLabelRight = ttk.Label(Column2, text="Добавить имя команды", font=("Arial", 15))
-    SetNameLabelRight.pack(side=TOP, anchor=W, pady=5)
-    NameWarningLeft = ttk.Label(Column1, text='заполните это поле', foreground='#ff0000')
-    NameWarningRight = ttk.Label(Column2, text='заполните это поле', foreground='#ff0000')
+    NameFrameLeft = ttk.Frame(Column1)
+    NameFrameLeft.pack(side=TOP, anchor=W)
+    NameFrameRight = ttk.Frame(Column2)
+    NameFrameRight.pack(side=TOP, anchor=W)
+    SetNameLabelLeft = ttk.Label(NameFrameLeft, text="Добавить имя команды", font=("Arial", 15))
+    SetNameLabelLeft.pack(side=LEFT, pady=5)
+    SetNameLabelRight = ttk.Label(NameFrameRight, text="Добавить имя команды", font=("Arial", 15))
+    SetNameLabelRight.pack(side=LEFT, pady=5)
+    NameWarningLeft = ttk.Label(NameFrameLeft, text='заполните это поле', foreground='#ff0000')
+    NameWarningRight = ttk.Label(NameFrameRight, text='заполните это поле', foreground='#ff0000')
     SetNameEntryLeft = ttk.Entry(Column1, width=50, validate='focusout')
     SetNameEntryLeft.pack(side=TOP, anchor=W, pady=5)
     SetNameEntryRight = ttk.Entry(Column2, width=50, validate='focusout')
     SetNameEntryRight.pack(side=TOP, anchor=W, pady=5)
 
-    SetExeLabel = ttk.Label(Column1, text="Добавить исполняемый файл", font=("Arial", 15))
-    SetExeLabel.pack(side=TOP, anchor=W, pady=5)
-    ExeWarning = ttk.Label(Column1, text='заполните это поле', foreground='#ff0000')
+    ExeFrame = ttk.Frame(Column1)
+    ExeFrame.pack(side=TOP, anchor=W)
+    SetExeLabel = ttk.Label(ExeFrame, text="Добавить исполняемый файл", font=("Arial", 15))
+    SetExeLabel.pack(side=LEFT, pady=5)
+    ExeWarning = ttk.Label(ExeFrame, text='заполните это поле', foreground='#ff0000')
     SetExeEntry = ttk.Entry(Column1, width=50, validate='focusout')
     SetExeEntry.pack(side=TOP, anchor=W, pady=5)
 
-    SetCommandLabelLeft = ttk.Label(Column1, text="Добавить команды", font=("Arial", 15))
-    SetCommandLabelLeft.pack(side=TOP, anchor=W, pady=5)
-    SetCommandLabelRight = ttk.Label(Column2, text="Добавить команды", font=("Arial", 15))
-    SetCommandLabelRight.pack(side=TOP, anchor=W, pady=5)
-    CommandWarningLeft = ttk.Label(Column1, text='заполните это поле', foreground='#ff0000')
-    CommandWarningRight = ttk.Label(Column2, text='заполните это поле', foreground='#ff0000')
+    CommandFrameLeft = ttk.Frame(Column1)
+    CommandFrameLeft.pack(side=TOP, anchor=W)
+    CommandFrameRight = ttk.Frame(Column2)
+    CommandFrameRight.pack(side=TOP, anchor=W)
+    SetCommandLabelLeft = ttk.Label(CommandFrameLeft, text="Добавить команды", font=("Arial", 15))
+    SetCommandLabelLeft.pack(side=LEFT, pady=5)
+    SetCommandLabelRight = ttk.Label(CommandFrameRight, text="Добавить команды", font=("Arial", 15))
+    SetCommandLabelRight.pack(side=LEFT, pady=5)
+    CommandWarningLeft = ttk.Label(CommandFrameLeft, text='заполните это поле', foreground='#ff0000')
+    CommandWarningRight = ttk.Label(CommandFrameRight, text='заполните это поле', foreground='#ff0000')
     entriesLeft = []
     entriesRight = []
     for i in range(5):
@@ -297,12 +307,16 @@ def create_states():
         entriesLeft.append(SetCommandEntryLeft)
         entriesRight.append(SetCommandEntryRight)
 
-    SetRespondLabelLeft = ttk.Label(Column1, text="Добавить ответ ассистента", font=("Arial", 15))
-    SetRespondLabelLeft.pack(side=TOP, anchor=W, pady=5)
-    SetRespondLabelRight = ttk.Label(Column2, text="Добавить ответ ассистента", font=("Arial", 15))
-    SetRespondLabelRight.pack(side=TOP, anchor=W, pady=5)
-    RespondWarningLeft = ttk.Label(Column1, text='заполните это поле', foreground='#ff0000')
-    RespondWarningRight = ttk.Label(Column2, text='заполните это поле', foreground='#ff0000')
+    RespondFrameLeft = ttk.Frame(Column1)
+    RespondFrameLeft.pack(side=TOP, anchor=W)
+    RespondFrameRight = ttk.Frame(Column2)
+    RespondFrameRight.pack(side=TOP, anchor=W)
+    SetRespondLabelLeft = ttk.Label(RespondFrameLeft, text="Добавить ответ ассистента", font=("Arial", 15))
+    SetRespondLabelLeft.pack(side=LEFT, pady=5)
+    SetRespondLabelRight = ttk.Label(RespondFrameRight, text="Добавить ответ ассистента", font=("Arial", 15))
+    SetRespondLabelRight.pack(side=LEFT, pady=5)
+    RespondWarningLeft = ttk.Label(RespondFrameLeft, text='заполните это поле', foreground='#ff0000')
+    RespondWarningRight = ttk.Label(RespondFrameRight, text='заполните это поле', foreground='#ff0000')
     SetRespondEntryLeft = ttk.Entry(Column1, width=50, validate='focusout')
     SetRespondEntryLeft.pack(side=TOP, anchor=W, pady=5)
     SetRespondEntryRight = ttk.Entry(Column2, width=50, validate='focusout')
@@ -473,6 +487,8 @@ def create_dynamic_state(state):
                 entry_command.delete(0, END)
                 entry_command.insert(0, v['assistant'])
                 command_vars.append((command, "", label, entry_command))
+    elif state == "show_apps_and_webs":
+        pass
     frames[state] = frame
 
 
@@ -497,13 +513,14 @@ def main():
 
     simulate_loading()
 
-    window.geometry('1000x500')
+    window.geometry('1000x550')
     window.protocol("WM_DELETE_WINDOW", close_app)
 
     menu_bar = Menu(window)
     window.config(menu=menu_bar)
     settings_exit = Menu(menu_bar, tearoff=0)
     commands_settings = Menu(menu_bar, tearoff=0)
+    apps_and_webs = Menu(menu_bar, tearoff=0)
     menu_bar.add_cascade(label='Меню', menu=settings_exit)
     settings_exit.add_command(label="Главная", command=lambda: set_state('home'))
     settings_exit.add_command(label="Настройки", command=lambda: set_state('settings'))
@@ -512,8 +529,10 @@ def main():
     commands_settings.add_command(label="Список команд", command=lambda: set_state('show_commands'))
     commands_settings.add_command(label="Изменить голосовые команды", command=lambda: set_state('change_voice_commands'))
     commands_settings.add_command(label="Изменить реакцию ассистента", command=lambda: set_state('change_assistant_respond'))
-    commands_settings.add_command(label="Добавить приложения", command=lambda: set_state('add_app'))
-    commands_settings.add_command(label="Добавить вебсайт", command=lambda: set_state('add_website'))
+    menu_bar.add_cascade(label='Приложения и сайты', menu=apps_and_webs)
+    apps_and_webs.add_command(label="Добавленные приложения и вебсайты", command=lambda: set_state('show_apps_and_webs'))
+    apps_and_webs.add_command(label="Добавить приложение", command=lambda: set_state('add_app'))
+    apps_and_webs.add_command(label="Добавить вебсайт", command=lambda: set_state('add_website'))
 
     frames = {}
     create_states()
