@@ -31,6 +31,7 @@ modules.load_models += 1
 isWorking = False
 start_work = 0
 work_time = 15
+
 #load data
 with open(modules.find_path("numbers.json"), "r", encoding='utf-8') as file:
     number_list = json.load(file)
@@ -42,11 +43,11 @@ for module_file in module_files:
 
 #queue adding text
 def q_callback(indata, frames, time, status):
-    q.put(bytes(indata))
+    if interface.toggleBot:
+        q.put(bytes(indata))
 
 #records voice
 def listen(rec, callback):
-    global loading_models
     with sd.RawInputStream(samplerate=sample_rate, blocksize=8000, device=device, dtype='int16',
                            channels=1, callback=q_callback):
         while True:
@@ -60,7 +61,6 @@ def listen(rec, callback):
 
 #listens commands
 def listen_command(raw_voice, fullCommand):
-    toggle = interface.ToggleBot.get()
     with open(command_list_dir, "r", encoding='utf-8') as file:
         command_list = json.load(file)
     global start_work, work_time, isWorking
@@ -74,7 +74,8 @@ def listen_command(raw_voice, fullCommand):
             voice.remove(t)
     voice = "".join(voice)
     command = modules.levenshtein(voice, command_list)
-    if toggle:
+    print(raw_voice,command,fullCommand, isWorking)
+    if interface.toggleBot:
         if isWorking and fullCommand:
             try:
                 if command['cmd'] in command_list and command['cmd'] != 'start':
@@ -89,5 +90,4 @@ def listen_command(raw_voice, fullCommand):
             start_work = time.time()
             isWorking = True
 
-listening_thread = threading.Thread(target=listen, args=(rec, listen_command))
-listening_thread.start()
+listen(rec, listen_command)

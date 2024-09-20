@@ -20,6 +20,7 @@ ALL_SPEAKERS = ['aidar', 'baya', 'kseniya', 'xenia']
 current_state = ''
 command_vars = []
 closed = False
+toggleBot = True
 
 #start loading models progress bar
 def simulate_loading(duration = 5):
@@ -59,12 +60,13 @@ def close_app(window):
     closed = True
 
 def toggle_bot():
-    if ToggleBot.get():
-        ToggleBot.set(False)
+    global toggleBot
+    if toggleBot:
+        toggleBot = False
         ToggleButton.configure(text='Включить ассистента')
         ToggleBotLabel.configure(text='Сейчас ассистент неактивен')
     else:
-        ToggleBot.set(True)
+        toggleBot = True
         ToggleButton.configure(text='Выключить ассистента')
         ToggleBotLabel.configure(text='Сейчас ассистент активен')
 
@@ -301,8 +303,7 @@ def create_states():
     SoftName.pack(pady=5)
     DescLabel = ttk.Label(frame, text="Начните использовать голосовое управление уже сегодня и сделайте вашу работу за компьютером еще более комфортной и продуктивной!", font=("Helvetica", 12), wraplength=1000, justify="center")
     DescLabel.pack(side = TOP)
-    global ToggleBot, ToggleButton, ToggleBotLabel
-    ToggleBot = BooleanVar(value=True)
+    global ToggleButton, ToggleBotLabel
     ToggleButton = Button(frame, text="Выключить ассистента", font=("Helvetica", 16), command=toggle_bot)
     ToggleBotLabel = ttk.Label(frame, text="Cейчас ассистент активен", font=("Helvetica", 16))
     ToggleBotLabel.pack(pady=30)
