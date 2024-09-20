@@ -311,7 +311,7 @@ def create_states():
     frames['home'] = frame
 
     #help
-    with open(modules.find_path('help.txt'), 'r', encoding='utf-8') as file:
+    with open(modules.find_path('other/help.txt'), 'r', encoding='utf-8') as file:
         help_text = file.read()
     frame = ttk.Frame(window)
     Label = ttk.Label(frame, text="Руководство пользователя", font=("Helvetica", 25))
@@ -620,6 +620,7 @@ def main():
     window.protocol("WM_DELETE_WINDOW", lambda: close_app(window))
     simulate_loading()
     window.geometry('1000x550')
+    window.iconbitmap(default="other/PCAudio.ico")
 
     #main menu for changing states
     menu_bar = Menu(window)
