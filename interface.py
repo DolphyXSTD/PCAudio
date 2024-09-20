@@ -310,6 +310,24 @@ def create_states():
     ToggleButton.pack()
     frames['home'] = frame
 
+    #help
+    with open(modules.find_path('help.txt'), 'r', encoding='utf-8') as file:
+        help_text = file.read()
+    frame = ttk.Frame(window)
+    Label = ttk.Label(frame, text="Руководство пользователя", font=("Helvetica", 25))
+    Label.pack(pady=5)
+    canvas = Canvas(frame)
+    scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
+    scrollable_frame = ttk.Frame(canvas)
+    scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+    label = ttk.Label(scrollable_frame,text=help_text, font=("Helvetica", 10), wraplength=950)
+    label.pack(fill="both", expand=True)
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+    frames['help'] = frame
+
     #add_app
     frame = ttk.Frame(window)
     Label = ttk.Label(frame, text="Добавить приложение", font=("Arial", 25))
@@ -599,9 +617,8 @@ def main():
     global window, frames
     window = Tk()
     window.title('PCAudio')
-
+    window.protocol("WM_DELETE_WINDOW", lambda: close_app(window))
     simulate_loading()
-
     window.geometry('1000x550')
 
     #main menu for changing states
